@@ -91,7 +91,6 @@ int main (){
   //variáveis para controle da opção escolhida em cada menu
   int op1, op2;
   do{
-    op1 = -1;
     p("escolha uma opção:\n");
     p("1- Criar\n");
     p("2- Inserção\n");
@@ -105,14 +104,13 @@ int main (){
      **************************************************************************/
     getchar();
 
-    if(op1 < 0 || op1 > 3){
+    if(op1 < 0 || op1 > 4){
       p("op1 recebeu um valor inválido\n");
     }
 
     switch(op1){
       case 1:
         do{
-          op2 = -1;
           p("escolha uma opção:\n");
           p("1- Criar nova ficha de aluno\n");
           p("2- Criar nova ficha de disciplina\n");
@@ -125,9 +123,11 @@ int main (){
               break;
             case 1:
               criar_aluno(&ptr_i_aluno, "", "", 0);
+              p("finalizado a chamada\n");
               break;
             case 2:
               criar_disciplina(&ptr_i_disciplina, "", "", 0, 0);
+              p("finalizado a chamada\n");
               break;
             default:
               p("Opção inválida\n");
@@ -137,7 +137,6 @@ int main (){
         break;
       case 2:
         do{
-          op2 = -1;
           p("escolha uma opção:\n");
           p("1- Inserir novos alunos para disciplina\n");
           p("2- Inserir novas disciplinas para aluno\n");
@@ -158,7 +157,6 @@ int main (){
               break;
           }
         }while(op2);
-        op1 = -1;
         break;
       case 3:
         do{
@@ -279,7 +277,7 @@ void criar_matricula(Matricula **ptr, float periodo, int aluno, int disciplina){
     }
 
     n_ptr->prox = ptr_aux;
-    ptr_aux->ant = n_ptr;
+    // ptr_aux->ant = n_ptr;
 
     //caso em que o elemento será colocado como o primeiro da lista
     if(!o_ptr){
@@ -321,6 +319,7 @@ void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
     s(" %d", &(n_ptr->codigo));
   }
 
+
   ptr_aux = *ptr;
   o_ptr = NULL;
 
@@ -338,7 +337,8 @@ void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
     }
 
     n_ptr->prox = ptr_aux;
-    ptr_aux->ant = n_ptr;
+    // ptr_aux->ant = n_ptr;
+
 
     if(!o_ptr){
       *ptr = n_ptr;
@@ -400,7 +400,7 @@ void criar_disciplina(Disciplina **ptr, char*nome, char* professor, int creditos
     }
 
     n_ptr->prox = ptr_aux;
-    ptr_aux->ant = n_ptr;
+    // ptr_aux->ant = n_ptr;
 
     if(!o_ptr){
       *ptr = n_ptr;
@@ -654,7 +654,7 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
   arq = fopen("sistema_de_matricula.txt", "w");
   if (!arq) {
     printf("Erro ao abrir o arquivo.\n");
-    return 1;
+    return;
   }
 
   p("chamada a função salvar\n");
@@ -662,11 +662,11 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
   while(ptr_matricula){
     fputc('m',arq);
     fputc(tab, arq);
-    fprintf(fptr, "%f" , ptr_matricula->periodo);
+    fprintf(arq, "%f" , ptr_matricula->periodo);
     fputc(tab, arq);
-    fprintf(fptr, "%d" , ptr_matricula->aluno);
+    fprintf(arq, "%d" , ptr_matricula->aluno);
     fputc(tab, arq);
-    fprintf(fptr, "%d" , ptr_matricula->disciplina);
+    fprintf(arq, "%d" , ptr_matricula->disciplina);
     fputc(tab, arq);
     fputc(el, arq);
     ptr_matricula = ptr_matricula->prox;
@@ -674,25 +674,27 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
   while(ptr_aluno){
     fputc('a',arq);
     fputc(tab, arq);
-    fprintf(fptr, "%s" , ptr_aluno->nome);
+    fprintf(arq, "%s" , ptr_aluno->nome);
     fputc(tab, arq);
-    fprintf(fptr, "%s" , ptr_aluno->cpf);
+    fprintf(arq, "%s" , ptr_aluno->cpf);
     fputc(tab, arq);
-    fprintf(fptr, "%d" , ptr_aluno->codigo);
+    fprintf(arq, "%d" , ptr_aluno->codigo);
     fputc(tab, arq);
     fputc(el, arq);
+    p("\t\taluno salvo\n");
     ptr_aluno = ptr_aluno->prox;
+    p("\t\tboo\n");
   }
   while(ptr_disciplina){
     fputc('d',arq);
     fputc(tab, arq);
-    fprintf(fptr, "%s" , ptr_disciplina->nome);
+    fprintf(arq, "%s" , ptr_disciplina->nome);
     fputc(tab, arq);
-    fprintf(fptr, "%s" , ptr_disciplina->professor);
+    fprintf(arq, "%s" , ptr_disciplina->professor);
     fputc(tab, arq);
-    fprintf(fptr, "%d" , ptr_disciplina->creditos);
+    fprintf(arq, "%d" , ptr_disciplina->creditos);
     fputc(tab, arq);
-    fprintf(fptr, "%d" , ptr_disciplina->codigo);
+    fprintf(arq, "%d" , ptr_disciplina->codigo);
     fputc(tab, arq);
     fputc(el, arq);
     ptr_disciplina = ptr_disciplina->prox;
@@ -706,7 +708,7 @@ void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricul
   arq = fopen("sistema_de_matricula.txt", "r");
   if (!arq) {
     printf("Erro ao abrir o arquivo.\n");
-    return 1;
+    return;
   }
   char linha[MAX_LINE_SIZE];
 
@@ -725,8 +727,8 @@ void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricul
       criar_disciplina(&ptr_disciplina, nome, professor, creditos, codigo);
     } else {
       p("linha corrompida\n");
-      fclose(arq);
-      exit(1);
+      // fclose(arq);
+      // exit(1);
     }
   }
   return;
