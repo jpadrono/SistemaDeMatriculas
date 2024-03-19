@@ -3,7 +3,8 @@
 #include <string.h>
 #define p printf
 #define s scanf
-#define periodo_ATUAL 2024.1]
+#define PERIODO_ATUAL 2024.1]
+#define MAX_LINE_SIZE 300
 
 //Declaração das structs para lsitas encadeadas
 
@@ -50,9 +51,9 @@ Matricula *ptr_i_matricula = NULL;
  * funções no finla do código.                                                *
  ******************************************************************************/
 
-void criar_matricula(Matricula **ptr);
-void criar_aluno(Aluno **ptr);
-void criar_disciplina(Disciplina **ptr);
+void criar_matricula(Matricula **ptr, float periodo, int aluno, int disciplina);
+void criar_aluno(Aluno **ptr, char *nome, char *cpf, int codigo);
+void criar_disciplina(Disciplina **ptr, char *nome, char *professor, int creditos, int codigo);
 void inserir_aluno_na_disciplina();
 void inserir_disciplina_no_aluno();
 void remover_matricula(Matricula **ptr);
@@ -69,8 +70,8 @@ Aluno *procurar_aluno(Aluno *ptr);
 Disciplina *procurar_disciplina(Disciplina *ptr);
 Matricula *procurar_matricula(Matricula *ptr);
 void liberar();
-void salvar();
-void recuperar();
+void salvar(FILE *ptr, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula* ptr_matricula);
+void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *ptr_matricula);
 /******************************************************************************
  * nesse começo de código, vamos considerar que serão feitas apenas cadastros *
  * válidos, porém é interessante colocar algumas funções de validação,        *
@@ -79,11 +80,13 @@ void recuperar();
 
 
 //declaração de variáveis globais
+FILE *fptr;
+
 
 
 int main (){
   //primeiro passoda main: recurar os dados salvos
-  recuperar();
+  recuperar(fptr, ptr_i_aluno, ptr_i_disciplina, ptr_i_matricula);
   p("\t\tSISTEMA DE MATRÍCULAS\t\t\n");
   //variáveis para controle da opção escolhida em cada menu
   int op1, op2;
@@ -121,10 +124,10 @@ int main (){
             case 0:
               break;
             case 1:
-              criar_aluno(&ptr_i_aluno);
+              criar_aluno(&ptr_i_aluno, "", "", 0);
               break;
             case 2:
-              criar_disciplina(&ptr_i_disciplina);
+              criar_disciplina(&ptr_i_disciplina, "", "", 0, 0);
               break;
             default:
               p("Opção inválida\n");
@@ -211,7 +214,7 @@ int main (){
   }while(op1);
 
   //antes de finalizar a main: salvar os dados e liberar as alocações
-  salvar();
+  salvar(fptr, ptr_i_aluno, ptr_i_disciplina, ptr_i_matricula);
   liberar(ptr_i_aluno, ptr_i_disciplina, ptr_i_matricula);
   return 0;
 }
@@ -224,7 +227,7 @@ int main (){
  * tenham algum retorno para eu saber se elas estão sendo chamadas            *
  ******************************************************************************/
 
-void criar_matricula(Matricula **ptr){
+void criar_matricula(Matricula **ptr, float periodo, int aluno, int disciplina){
   p("chamada a função criar_matricula\n");
   // ponteiro de controle para ordenar a lista encadeada
   // as variaveis serao ordenadas no momento da criacao
@@ -238,14 +241,20 @@ void criar_matricula(Matricula **ptr){
   }
 
   //coleta dos dados
-  p("digite o período:\n");
-  s(" %f", &(n_ptr->periodo));
+  if(periodo){
+    n_ptr->periodo = periodo;
+    n_ptr->aluno = aluno;
+    n_ptr->disciplina = disciplina;
+  }else{
+    p("digite o período:\n");
+    s(" %f", &(n_ptr->periodo));
 
-  p("digite o código da aluno:\n");
-  s(" %d", &(n_ptr->aluno));
+    p("digite o código da aluno:\n");
+    s(" %d", &(n_ptr->aluno));
 
-  p("digite o código do disciplina:\n");
-  s(" %d", &(n_ptr->disciplina));
+    p("digite o código do disciplina:\n");
+    s(" %d", &(n_ptr->disciplina));
+  }
 
   //inserção na lista encadeada
   ptr_aux = *ptr;
@@ -284,7 +293,7 @@ void criar_matricula(Matricula **ptr){
   return;
 }
 
-void criar_aluno(Aluno **ptr){
+void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
   p("chamada a função criar_aluno\n");
   Aluno *n_ptr, *o_ptr, *ptr_aux;
 
@@ -294,17 +303,23 @@ void criar_aluno(Aluno **ptr){
     return;
   }
 
-  char string_var[100];
-  p("digite o nome do aluno:\n");
-  s(" %[^\n]", string_var);
-  strcpy(n_ptr->nome, string_var);
+  if(codigo){
+    strcpy(n_ptr->nome, nome);
+    strcpy(n_ptr->cpf, cpf);
+    n_ptr->codigo = codigo;
+  }else{
+    char string_var[100];
+    p("digite o nome do aluno:\n");
+    s(" %[^\n]", string_var);
+    strcpy(n_ptr->nome, string_var);
 
-  p("digite o CPF do aluno no formato XXXXXXXXX-XX:\n");
-  s(" %[^\n]", string_var);
-  strcpy(n_ptr->cpf, string_var);
+    p("digite o CPF do aluno no formato XXXXXXXXX-XX:\n");
+    s(" %[^\n]", string_var);
+    strcpy(n_ptr->cpf, string_var);
 
-  p("digite o código do aluno:\n");
-  s(" %f", &(n_ptr->codigo));
+    p("digite o código do aluno:\n");
+    s(" %d", &(n_ptr->codigo));
+  }
 
   ptr_aux = *ptr;
   o_ptr = NULL;
@@ -336,7 +351,7 @@ void criar_aluno(Aluno **ptr){
   return;
 }
 
-void criar_disciplina(Disciplina **ptr){
+void criar_disciplina(Disciplina **ptr, char*nome, char* professor, int creditos, int codigo){
   p("chamada a função criar_disciplina\n");
   Disciplina *n_ptr, *o_ptr, *ptr_aux;
 
@@ -346,20 +361,27 @@ void criar_disciplina(Disciplina **ptr){
     return;
   }
 
-  char string_var[100];
-  p("digite o nome da disciplina:\n");
-  s(" %[^\n]", string_var);
-  strcpy(n_ptr->nome, string_var);
+  if(codigo){
+    strcpy(n_ptr->nome, nome);
+    strcpy(n_ptr->professor, professor);
+    n_ptr->creditos = creditos;
+    n_ptr->codigo = codigo;
+  }else{
+    char string_var[100];
+    p("digite o nome da disciplina:\n");
+    s(" %[^\n]", string_var);
+    strcpy(n_ptr->nome, string_var);
 
-  p("digite o nomde do professor:\n");
-  s(" %[^\n]", string_var);
-  strcpy(n_ptr->professor, string_var);
+    p("digite o nomde do professor:\n");
+    s(" %[^\n]", string_var);
+    strcpy(n_ptr->professor, string_var);
 
-  p("digite os créditos da disciplina:\n");
-  s(" %f", &(n_ptr->creditos));
+    p("digite os créditos da disciplina:\n");
+    s(" %d", &(n_ptr->creditos));
 
-  p("digite o código da disciplina:\n");
-  s(" %f", &(n_ptr->codigo));
+    p("digite o código da disciplina:\n");
+    s(" %d", &(n_ptr->codigo));
+  }
 
   ptr_aux = *ptr;
   o_ptr = NULL;
@@ -394,11 +416,11 @@ void criar_disciplina(Disciplina **ptr){
 
 void inserir_aluno_na_disciplina(){
   p("chamada a função inserir_aluno_na_disciplina\n");
-  criar_matricula(&ptr_i_matricula);
+  criar_matricula(&ptr_i_matricula, 0, 0, 0);
 }
 void inserir_disciplina_no_aluno(){
   p("chamada a função inserir_disciplina_no_aluno\n");
-  criar_matricula(&ptr_i_matricula);
+  criar_matricula(&ptr_i_matricula, 0, 0, 0);
 }
 
 void remover_matricula(Matricula **ptr){
@@ -517,6 +539,8 @@ void consultar_disciplinas_por_aluno(Matricula **ptr){
   float per_aux;
   int al_aux;
 
+  ptr_aux = *ptr;
+
   p("Digite o período de matricula do aluno\n");
   s(" %f", &per_aux);
 
@@ -546,6 +570,8 @@ void consultar_alunos_por_disciplina(Matricula **ptr){
   Matricula *ptr_aux;
   float per_aux;
   int dis_aux;
+
+  ptr_aux = *ptr;
 
   p("Digite o período de matricula do aluno\n");
   s(" %f", &per_aux);
@@ -620,10 +646,88 @@ void liberar(Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *ptr_matric
   }
 }
 
-void salvar(){
+/******************************************************************************
+ * A ideia aqui vai ser salvar uma struct em cada linha, sendo que a primeira *
+ * letra da linha indica se trata de uma matricula, aluno ou disciplina       *
+ ******************************************************************************/
+void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *ptr_matricula){
+  arq = fopen("sistema_de_matricula.txt", "w");
+  if (!arq) {
+    printf("Erro ao abrir o arquivo.\n");
+    return 1;
+  }
+
   p("chamada a função salvar\n");
+  char tab = '\t', el = '\n'; 
+  while(ptr_matricula){
+    fputc('m',arq);
+    fputc(tab, arq);
+    fprintf(fptr, "%f" , ptr_matricula->periodo);
+    fputc(tab, arq);
+    fprintf(fptr, "%d" , ptr_matricula->aluno);
+    fputc(tab, arq);
+    fprintf(fptr, "%d" , ptr_matricula->disciplina);
+    fputc(tab, arq);
+    fputc(el, arq);
+    ptr_matricula = ptr_matricula->prox;
+  }
+  while(ptr_aluno){
+    fputc('a',arq);
+    fputc(tab, arq);
+    fprintf(fptr, "%s" , ptr_aluno->nome);
+    fputc(tab, arq);
+    fprintf(fptr, "%s" , ptr_aluno->cpf);
+    fputc(tab, arq);
+    fprintf(fptr, "%d" , ptr_aluno->codigo);
+    fputc(tab, arq);
+    fputc(el, arq);
+    ptr_aluno = ptr_aluno->prox;
+  }
+  while(ptr_disciplina){
+    fputc('d',arq);
+    fputc(tab, arq);
+    fprintf(fptr, "%s" , ptr_disciplina->nome);
+    fputc(tab, arq);
+    fprintf(fptr, "%s" , ptr_disciplina->professor);
+    fputc(tab, arq);
+    fprintf(fptr, "%d" , ptr_disciplina->creditos);
+    fputc(tab, arq);
+    fprintf(fptr, "%d" , ptr_disciplina->codigo);
+    fputc(tab, arq);
+    fputc(el, arq);
+    ptr_disciplina = ptr_disciplina->prox;
+  }
+  fputc(el, arq);
+  fclose(arq);
 }
 
-void recuperar(){
+void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *ptr_matricula){
   p("chamada a função recuperar\n");
+  arq = fopen("sistema_de_matricula.txt", "r");
+  if (!arq) {
+    printf("Erro ao abrir o arquivo.\n");
+    return 1;
+  }
+  char linha[MAX_LINE_SIZE];
+
+  int aluno, disciplina, codigo, creditos;
+  float periodo;
+  char nome[100], cpf[13], professor[100];
+  while (fgets(linha, sizeof(linha), arq)) {
+    if (linha[0] == 'p') {
+      sscanf(linha, "%*s%f%d%d", &periodo, &aluno, &disciplina);
+      criar_matricula(&ptr_i_matricula, periodo, aluno, disciplina);
+    } else if (linha[0] == 'a') {
+      sscanf(linha, "%*s%s%s%d", nome, cpf, &codigo);
+      criar_aluno(&ptr_i_aluno, nome, cpf, codigo);
+    } else if (linha[0] == 'd') {
+      sscanf(linha, "%*s%s%s%d%d", nome, professor, &creditos, &codigo);
+      criar_disciplina(&ptr_disciplina, nome, professor, creditos, codigo);
+    } else {
+      p("linha corrompida\n");
+      fclose(arq);
+      exit(1);
+    }
+  }
+  return;
 }
