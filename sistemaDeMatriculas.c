@@ -456,8 +456,7 @@ void remover_matricula(Matricula **ptr){
     ptr_aux->aluno == al_aux &&
     ptr_aux->disciplina == dis_aux
   ){
-    o_ptr = ptr_aux->prox;
-    ptr_aux->prox->ant = o_ptr;
+    o_ptr->prox = ptr_aux->prox;
     free(ptr_aux);
     p("Matricula removida com sucesso\n");
   }else{
@@ -489,8 +488,7 @@ void remover_aluno(Aluno **ptr){
   if(
     ptr_aux->codigo == al_aux
   ){
-    o_ptr = ptr_aux->prox;
-    ptr_aux->prox->ant = o_ptr;
+    o_ptr->prox = ptr_aux->prox;
     free(ptr_aux);
     p("Aluno removido com sucesso\n");
   }else{
@@ -522,8 +520,7 @@ void remover_disciplina(Disciplina **ptr){
   if(
     ptr_aux->codigo == dis_aux
   ){
-    o_ptr = ptr_aux->prox;
-    ptr_aux->prox->ant = o_ptr;
+    o_ptr->prox = ptr_aux->prox;
     free(ptr_aux);
     p("Disciplina removida com sucesso\n");
   }else{
@@ -724,7 +721,7 @@ void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricul
       criar_aluno(&ptr_i_aluno, nome, cpf, codigo);
     } else if (linha[0] == 'd') {
       sscanf(linha, "%*s%s%s%d%d", nome, professor, &creditos, &codigo);
-      criar_disciplina(&ptr_disciplina, nome, professor, creditos, codigo);
+      criar_disciplina(&ptr_i_disciplina, nome, professor, creditos, codigo);
     } else {
       p("linha corrompida\n");
       // fclose(arq);
