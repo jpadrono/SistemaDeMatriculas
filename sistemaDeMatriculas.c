@@ -71,7 +71,7 @@ Disciplina *procurar_disciplina(Disciplina *ptr);
 Matricula *procurar_matricula(Matricula *ptr);
 void liberar();
 void salvar(FILE *ptr, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula* ptr_matricula);
-void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *ptr_matricula);
+void recuperar(FILE *arq);
 /******************************************************************************
  * nesse começo de código, vamos considerar que serão feitas apenas cadastros *
  * válidos, porém é interessante colocar algumas funções de validação,        *
@@ -86,7 +86,7 @@ FILE *fptr;
 
 int main (){
   //primeiro passoda main: recurar os dados salvos
-  recuperar(fptr, ptr_i_aluno, ptr_i_disciplina, ptr_i_matricula);
+  recuperar(fptr);
   p("\t\tSISTEMA DE MATRÍCULAS\t\t\n");
   //variáveis para controle da opção escolhida em cada menu
   int op1, op2;
@@ -276,13 +276,29 @@ void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
     //irei ordenar por periodo, codigo do aluno, codigo da disciplina
     while(
       ptr_aux && 
-      ptr_aux->periodo < n_ptr->periodo &&
-      ptr_aux->aluno < n_ptr->aluno &&
+      ptr_aux->periodo < n_ptr->periodo
+    ){
+      o_ptr = ptr_aux;
+      ptr_aux = ptr_aux->prox;
+    }
+    while(
+      ptr_aux && 
+      ptr_aux->periodo == n_ptr->periodo &&
+      ptr_aux->aluno < n_ptr->aluno
+    ){
+      o_ptr = ptr_aux;
+      ptr_aux = ptr_aux->prox;
+    }
+    while(
+      ptr_aux && 
+      ptr_aux->periodo == n_ptr->periodo &&
+      ptr_aux->aluno == n_ptr->aluno &&
       ptr_aux->disciplina < n_ptr->disciplina 
     ){
       o_ptr = ptr_aux;
       ptr_aux = ptr_aux->prox;
     }
+    
 
     n_ptr->prox = ptr_aux;
     // ptr_aux->ant = n_ptr;
@@ -452,9 +468,24 @@ void remover_matricula(Matricula **ptr){
 
   while(
     ptr_aux && 
-    ptr_aux->periodo < per_aux &&
-    ptr_aux->aluno < al_aux &&
-    ptr_aux->disciplina < dis_aux  
+    ptr_aux->periodo < per_aux
+  ){
+    o_ptr = ptr_aux;
+    ptr_aux = ptr_aux->prox;
+  }
+  while(
+    ptr_aux && 
+    ptr_aux->periodo == per_aux &&
+    ptr_aux->aluno < al_aux
+  ){
+    o_ptr = ptr_aux;
+    ptr_aux = ptr_aux->prox;
+  }
+  while(
+    ptr_aux && 
+    ptr_aux->periodo == per_aux &&
+    ptr_aux->aluno == al_aux &&
+    ptr_aux->disciplina < dis_aux
   ){
     o_ptr = ptr_aux;
     ptr_aux = ptr_aux->prox;
@@ -465,7 +496,11 @@ void remover_matricula(Matricula **ptr){
     ptr_aux->aluno == al_aux &&
     ptr_aux->disciplina == dis_aux
   ){
-    o_ptr->prox = ptr_aux->prox;
+    if(o_ptr == NULL){
+      *ptr = ptr_aux->prox;
+    }else{
+      o_ptr->prox = ptr_aux->prox;
+    }
     free(ptr_aux);
     p("Matricula removida com sucesso\n");
   }else{
@@ -483,7 +518,7 @@ void remover_aluno(Aluno **ptr){
   o_ptr = NULL;
   ptr_aux = *ptr;
 
-  p("Digite o código do aluno deseja remover\n");
+  p("Digite o código do aluno que deseja remover\n");
   s(" %d", &al_aux);
 
   while(
@@ -497,7 +532,12 @@ void remover_aluno(Aluno **ptr){
   if(
     ptr_aux->codigo == al_aux
   ){
-    o_ptr->prox = ptr_aux->prox;
+    //caso seja removido o primeiro elemento
+    if(o_ptr == NULL){
+      *ptr = ptr_aux->prox;
+    }else{
+      o_ptr->prox = ptr_aux->prox;
+    }
     free(ptr_aux);
     p("Aluno removido com sucesso\n");
   }else{
@@ -529,7 +569,11 @@ void remover_disciplina(Disciplina **ptr){
   if(
     ptr_aux->codigo == dis_aux
   ){
-    o_ptr->prox = ptr_aux->prox;
+    if(o_ptr == NULL){
+      *ptr = ptr_aux->prox;
+    }else{
+      o_ptr->prox = ptr_aux->prox;
+    }
     free(ptr_aux);
     p("Disciplina removida com sucesso\n");
   }else{
@@ -713,7 +757,7 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
   fclose(arq);
 }
 
-void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *ptr_matricula){
+void recuperar(FILE *arq){
   p("chamada a função recuperar\n");
   arq = fopen("sistema_de_matricula.txt", "r");
   if (!arq) {
@@ -723,7 +767,6 @@ void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricul
   char linha[MAX_LINE_SIZE];
 
   int aluno, disciplina, codigo, creditos, periodo;
-  float var;
   char nome[100], cpf[13], professor[100];
   while (fgets(linha, sizeof(linha), arq)) {
     if (linha[0] == 'm') {
@@ -735,10 +778,6 @@ void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricul
     } else if (linha[0] == 'd') {
       sscanf(linha, "%*s%s%s%d%d", nome, professor, &creditos, &codigo);
       criar_disciplina(&ptr_i_disciplina, nome, professor, creditos, codigo);
-    } else {
-      p("linha corrompida\n");
-      // fclose(arq);
-      // exit(1);
     }
   }
   return;
