@@ -36,7 +36,7 @@ Disciplina *ptr_i_disciplina = NULL;
 
 typedef struct _Matricula{
   int aluno, disciplina;
-  float periodo;
+  int periodo;
   struct _Matricula *prox;
   struct _Matricula *ant;
 } Matricula;
@@ -51,7 +51,7 @@ Matricula *ptr_i_matricula = NULL;
  * funções no finla do código.                                                *
  ******************************************************************************/
 
-void criar_matricula(Matricula **ptr, float periodo, int aluno, int disciplina);
+void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina);
 void criar_aluno(Aluno **ptr, char *nome, char *cpf, int codigo);
 void criar_disciplina(Disciplina **ptr, char *nome, char *professor, int creditos, int codigo);
 void inserir_aluno_na_disciplina();
@@ -146,6 +146,8 @@ int main (){
 
 
           switch(op2){
+            case 0:
+              break;
             case 1:
               inserir_aluno_na_disciplina();
               break;
@@ -169,6 +171,8 @@ int main (){
           getchar(); 
 
           switch(op2){
+            case 0:
+              break;
             case 1:
               remover_matricula(&ptr_i_matricula);
               break;
@@ -194,6 +198,8 @@ int main (){
           getchar(); 
 
           switch(op2){
+            case 0:
+              break;
             case 1:
               consultar_disciplinas_por_aluno(&ptr_i_matricula);
               break;
@@ -225,7 +231,7 @@ int main (){
  * tenham algum retorno para eu saber se elas estão sendo chamadas            *
  ******************************************************************************/
 
-void criar_matricula(Matricula **ptr, float periodo, int aluno, int disciplina){
+void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
   p("chamada a função criar_matricula\n");
   // ponteiro de controle para ordenar a lista encadeada
   // as variaveis serao ordenadas no momento da criacao
@@ -244,10 +250,12 @@ void criar_matricula(Matricula **ptr, float periodo, int aluno, int disciplina){
     n_ptr->aluno = aluno;
     n_ptr->disciplina = disciplina;
   }else{
+    float var;
     p("digite o período:\n");
-    s(" %f", &(n_ptr->periodo));
+    s(" %f", &var);
+    n_ptr->periodo = (int)(var*10);
 
-    p("digite o código da aluno:\n");
+    p("digite o código do aluno:\n");
     s(" %d", &(n_ptr->aluno));
 
     p("digite o código do disciplina:\n");
@@ -372,7 +380,7 @@ void criar_disciplina(Disciplina **ptr, char*nome, char* professor, int creditos
     s(" %[^\n]", string_var);
     strcpy(n_ptr->nome, string_var);
 
-    p("digite o nomde do professor:\n");
+    p("digite o nome do professor:\n");
     s(" %[^\n]", string_var);
     strcpy(n_ptr->professor, string_var);
 
@@ -426,14 +434,15 @@ void inserir_disciplina_no_aluno(){
 void remover_matricula(Matricula **ptr){
   p("chamada a função remover_matricula\n");
   Matricula *o_ptr, *ptr_aux;
-  float per_aux;
-  int al_aux, dis_aux;
+  float var;
+  int al_aux, dis_aux, per_aux;
 
   o_ptr = NULL;
   ptr_aux = *ptr;
 
   p("digite o periodo em que deseja cancelar a matricula\n");
-  s(" %f", &per_aux);
+  s(" %f", &var);
+  per_aux = (int)(var*10);
 
   p("digite o código do aluno deseja cancelar a matricula\n");
   s(" %d", &al_aux);
@@ -533,13 +542,14 @@ void remover_disciplina(Disciplina **ptr){
 void consultar_disciplinas_por_aluno(Matricula **ptr){
   p("chamada a função consultar_disciplinas_por_aluno\n");
   Matricula *ptr_aux;
-  float per_aux;
-  int al_aux;
+  float var;
+  int al_aux, per_aux;
 
   ptr_aux = *ptr;
 
   p("Digite o período de matricula do aluno\n");
-  s(" %f", &per_aux);
+  s(" %f", &var);
+  per_aux = (int)(var*10);
 
   p("Digite o código do aluno que deseja fazer a consulta\n");
   s(" %d", &al_aux);
@@ -551,10 +561,11 @@ void consultar_disciplinas_por_aluno(Matricula **ptr){
     ptr_aux = ptr_aux->prox;
   }
   if(ptr_aux && ptr_aux->periodo == per_aux && ptr_aux->aluno == al_aux){
-    p("Lista de disciplinas em que o aluno %d está matriculado no período %f\n", al_aux, per_aux);
+    p("Lista de disciplinas em que o aluno %d está matriculado no período %.1f\n", al_aux, var);
     int count = 0;
     while(ptr_aux && ptr_aux->periodo == per_aux && ptr_aux->aluno == al_aux){
       p("%d-\t%d\n", count++, ptr_aux->disciplina);
+      ptr_aux = ptr_aux->prox;
     }
   }else{
     p("O aluno não está matriculado em nenhuma disciplina no período fornecido\n");
@@ -565,13 +576,14 @@ void consultar_disciplinas_por_aluno(Matricula **ptr){
 void consultar_alunos_por_disciplina(Matricula **ptr){
   p("chamada a função consultar_alunos_por_disciplinas\n");
   Matricula *ptr_aux;
-  float per_aux;
-  int dis_aux;
+  float var;
+  int dis_aux, per_aux;
 
   ptr_aux = *ptr;
 
   p("Digite o período de matricula do aluno\n");
-  s(" %f", &per_aux);
+  s(" %f", &var);
+  per_aux = (int)(var*10);
 
   p("Digite o código da disciplina que deseja fazer a consulta\n");
   s(" %d", &dis_aux);
@@ -584,9 +596,10 @@ void consultar_alunos_por_disciplina(Matricula **ptr){
     while(ptr_aux && ptr_aux->periodo == per_aux){
       if(ptr_aux->disciplina == dis_aux){
         if(!count){
-          p("Lista de alunos que estão matriculados na disicplina %d no período %f\n", dis_aux, per_aux);
+          p("Lista de alunos que estão matriculados na disicplina %d no período %.1f\n", dis_aux, var);
         }
         p("%d-\t%d\n", count++, ptr_aux->aluno);
+        ptr_aux = ptr_aux->prox;
       }else{
         ptr_aux = ptr_aux->prox;
       }
@@ -659,7 +672,7 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
   while(ptr_matricula){
     fputc('m',arq);
     fputc(tab, arq);
-    fprintf(arq, "%f" , ptr_matricula->periodo);
+    fprintf(arq, "%d" , ptr_matricula->periodo);
     fputc(tab, arq);
     fprintf(arq, "%d" , ptr_matricula->aluno);
     fputc(tab, arq);
@@ -709,12 +722,12 @@ void recuperar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricul
   }
   char linha[MAX_LINE_SIZE];
 
-  int aluno, disciplina, codigo, creditos;
-  float periodo;
+  int aluno, disciplina, codigo, creditos, periodo;
+  float var;
   char nome[100], cpf[13], professor[100];
   while (fgets(linha, sizeof(linha), arq)) {
-    if (linha[0] == 'p') {
-      sscanf(linha, "%*s%f%d%d", &periodo, &aluno, &disciplina);
+    if (linha[0] == 'm') {
+      sscanf(linha, "%*s%d%d%d", &periodo, &aluno, &disciplina);
       criar_matricula(&ptr_i_matricula, periodo, aluno, disciplina);
     } else if (linha[0] == 'a') {
       sscanf(linha, "%*s%s%s%d", nome, cpf, &codigo);
