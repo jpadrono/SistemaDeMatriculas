@@ -3,7 +3,7 @@
 #include <string.h>
 #define p printf
 #define s scanf
-#define PERIODO_ATUAL 2024.1]
+#define PERIODO_ATUAL 2024.1
 #define MAX_LINE_SIZE 300
 
 //Declaração das structs para lsitas encadeadas
@@ -63,6 +63,7 @@ void listar_alunos_por_periodo(); //dispensável
 void listar_disciplinas_por_periodo(); //dispensável
 void consultar_disciplinas_por_aluno(Matricula **ptr);
 void consultar_alunos_por_disciplina(Matricula **ptr);
+int verificar_cpf(char*ptr);
 //  Perceba que o return da função procurar é um ponteiro com o endereço da 
 // struct, visto que vamos usar essa função pra modificar, apagar ou printar os 
 // dados da matricula, do aluno ou da discilina;
@@ -334,9 +335,11 @@ void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
     p("digite o nome do aluno:\n");
     s(" %[^\n]", string_var);
     strcpy(n_ptr->nome, string_var);
-
-    p("digite o CPF do aluno no formato XXXXXXXXX-XX:\n");
-    s(" %[^\n]", string_var);
+    do{
+      p("digite o cpf do aluno:\n");
+      s(" %[^\n]", string_var);
+    }
+    while(verificar_cpf(string_var));
     strcpy(n_ptr->cpf, string_var);
 
     p("digite o código do aluno:\n");
@@ -781,4 +784,56 @@ void recuperar(FILE *arq){
     }
   }
   return;
+}
+int verificar_cpf(char*ptr){
+  int i, erro1=0, erro2=0, erro3=0;
+	int k=0;
+	erro1=0;
+	erro2=0;
+	erro3=0;
+	while(!erro3)
+	{
+		if(ptr[k]=='\0')
+		{
+			if(k!=12)
+			{
+				erro3++;	
+			}
+			else
+				break;
+		}
+		else
+			k++;
+	}
+	for(i=0;i<12;i++)
+	{
+		if(i==9){
+			if(ptr[i]!='-' && erro3==0)
+			{
+				printf("CPF inserido possui formato inválido\n");
+				erro2=1;
+			}
+		}
+		else{
+				int aux,zero;
+				aux=(int)ptr[i];
+				zero=(int)'0';
+				if((aux-zero>9)||(aux-zero<0))
+					erro1++;		
+		}	
+	}
+	if(erro1==0 && erro2==0 && erro3==0)
+  {
+    printf("Seu cpf foi cadastrado com sucesso\n");
+    return 0;
+  }
+	if(erro1&&erro3==0)
+  {
+    printf("Seu CPF deve conter apenas dígitos\n");
+    return 1;
+  }
+	if(erro3){
+		printf("Quantidade de dígitos incorreta\n");
+    return 1;
+	}
 }
