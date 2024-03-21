@@ -298,6 +298,15 @@ void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
       o_ptr = ptr_aux;
       ptr_aux = ptr_aux->prox;
     }
+
+    if(ptr_aux && 
+      ptr_aux->periodo == n_ptr->periodo &&
+      ptr_aux->aluno == n_ptr->aluno &&
+      ptr_aux->disciplina == n_ptr->disciplina
+    ){
+      p("matricula já existente\n");
+      return;
+    }
     
 
     n_ptr->prox = ptr_aux;
@@ -358,6 +367,11 @@ void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
     ){
       o_ptr = ptr_aux;
       ptr_aux = ptr_aux->prox;
+    }
+
+    if(ptr_aux && ptr_aux->codigo == n_ptr->codigo){
+      p("aluno já cadastrado\n");
+      return;
     }
 
     n_ptr->prox = ptr_aux;
@@ -421,6 +435,12 @@ void criar_disciplina(Disciplina **ptr, char*nome, char* professor, int creditos
     ){
       o_ptr = ptr_aux;
       ptr_aux = ptr_aux->prox;
+    }
+
+    if(ptr_aux &&
+     ptr_aux->codigo == n_ptr->codigo){
+      p("disciplina já cadastrada\n");
+      return;
     }
 
     n_ptr->prox = ptr_aux;
