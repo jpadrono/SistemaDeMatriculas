@@ -57,7 +57,7 @@ void criar_disciplina(Disciplina **ptr, char *nome, char *professor, int credito
 void inserir_aluno_na_disciplina();
 void inserir_disciplina_no_aluno();
 void remover_matricula(Matricula **ptr);
-void remover_aluno(Aluno **ptr);
+void remover_aluno(Aluno **ptr, Matricula **ptr2);
 void remover_disciplina(Disciplina **ptr);
 void listar_alunos_por_periodo(); //dispensável
 void listar_disciplinas_por_periodo(); //dispensável
@@ -178,7 +178,7 @@ int main (){
               remover_matricula(&ptr_i_matricula);
               break;
             case 2:
-              remover_aluno(&ptr_i_aluno);
+              remover_aluno(&ptr_i_aluno, &ptr_i_matricula);
               break;
             case 3:
               remover_disciplina(&ptr_i_disciplina);
@@ -345,7 +345,7 @@ void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
     s(" %[^\n]", string_var);
     strcpy(n_ptr->nome, string_var);
     do{
-      p("digite o cpf do aluno:\n");
+      p("digite o cpf do aluno no formato XXXXXXXXX-XX:\n");
       s(" %[^\n]", string_var);
     }
     while(verificar_cpf(string_var));
@@ -533,17 +533,22 @@ void remover_matricula(Matricula **ptr){
   return;
 }
 
-void remover_aluno(Aluno **ptr){
+void remover_aluno(Aluno **ptr, Matricula **ptr2){
   p("chamada a função remover_aluno\n");
   Aluno *o_ptr, *ptr_aux;
+  Matricula *o_ptr2, *ptr_aux2;
   int al_aux;
 
   o_ptr = NULL;
   ptr_aux = *ptr;
 
+  o_ptr2 = NULL;
+  ptr_aux2 = *ptr2;
+
   p("Digite o código do aluno que deseja remover\n");
   s(" %d", &al_aux);
 
+//Removendo o aluno da lista de alunos
   while(
     ptr_aux &&
     ptr_aux->codigo < al_aux
@@ -551,7 +556,6 @@ void remover_aluno(Aluno **ptr){
     o_ptr = ptr_aux;
     ptr_aux = ptr_aux->prox;
   }
-
   if(
     ptr_aux->codigo == al_aux
   ){
@@ -566,7 +570,38 @@ void remover_aluno(Aluno **ptr){
   }else{
     p("Aluno não encontrado\n");
   }
-
+  //Removendo o aluno todas as vezes que ele aparece na lista de matrícula
+  while(1){
+  while(
+    ptr_aux2 && 
+    ptr_aux2->aluno != al_aux
+  ){
+    o_ptr2 = ptr_aux2;
+    ptr_aux2 = ptr_aux2->prox;
+    p("entrei, mas ainda nao achei o aluno que eu quero\n");
+  }
+  if(
+    ptr_aux2->aluno == al_aux
+  ){
+    p("achei o aluno que eu quero\n");
+    while(1){
+    if(o_ptr2 == NULL){
+      *ptr2 = ptr_aux2->prox;
+    }else{
+      ptr_aux2 = ptr_aux2->prox;
+    }
+    if(ptr_aux2->aluno != al_aux){
+        o_ptr2->prox = ptr_aux2;
+        break;
+      }
+    }}
+    if(ptr_aux2->prox == NULL){
+      p("tchau lista");
+      break;
+    }
+    }
+    free(ptr_aux2);
+    p("Aluno removido da lista de matricula com sucesso\n");
   return;
 }
 
