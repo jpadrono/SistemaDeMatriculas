@@ -64,6 +64,9 @@ void listar_disciplinas_por_periodo(); //dispensável
 void consultar_disciplinas_por_aluno(Matricula **ptr);
 void consultar_alunos_por_disciplina(Matricula **ptr);
 int verificar_cpf(char*ptr);
+int verificar_periodo(int periodo);
+int verificar_codigo_disciplina(int codigo);
+int verificar_codigo_aluno(int codigo);
 //  Perceba que o return da função procurar é um ponteiro com o endereço da 
 // struct, visto que vamos usar essa função pra modificar, apagar ou printar os 
 // dados da matricula, do aluno ou da discilina;
@@ -311,7 +314,9 @@ void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
     
 
     n_ptr->prox = ptr_aux;
-    // ptr_aux->ant = n_ptr;
+    if(ptr_aux){
+      ptr_aux->ant = n_ptr;
+    }
 
     //caso em que o elemento será colocado como o primeiro da lista
     if(!o_ptr){
@@ -378,7 +383,9 @@ void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
     }
 
     n_ptr->prox = ptr_aux;
-    // ptr_aux->ant = n_ptr;
+    if(ptr_aux){
+      ptr_aux->ant = n_ptr;
+    }
 
 
     if(!o_ptr){
@@ -447,7 +454,9 @@ void criar_disciplina(Disciplina **ptr, char*nome, char* professor, int creditos
     }
 
     n_ptr->prox = ptr_aux;
-    // ptr_aux->ant = n_ptr;
+    if(ptr_aux){
+      ptr_aux->ant = n_ptr;
+    }
 
     if(!o_ptr){
       *ptr = n_ptr;
@@ -540,6 +549,8 @@ void remover_aluno(Aluno **ptr){
 
   o_ptr = NULL;
   ptr_aux = *ptr;
+  o_ptr2 = NULL;
+  ptr_aux2 = *ptr2;
 
   p("Digite o código do aluno que deseja remover\n");
   s(" %d", &al_aux);
@@ -566,7 +577,6 @@ void remover_aluno(Aluno **ptr){
   }else{
     p("Aluno não encontrado\n");
   }
-
   return;
 }
 
@@ -856,4 +866,5 @@ int verificar_cpf(char*ptr){
 		printf("Quantidade de dígitos incorreta\n");
     return 1;
 	}
+  return 0;
 }
