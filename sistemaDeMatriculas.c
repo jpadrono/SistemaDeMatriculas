@@ -123,11 +123,9 @@ int main (){
               break;
             case 1:
               criar_aluno(&ptr_i_aluno, "", "", 0);
-              p("finalizado a chamada\n");
               break;
             case 2:
               criar_disciplina(&ptr_i_disciplina, "", "", 0, 0);
-              p("finalizado a chamada\n");
               break;
             default:
               p("Opção inválida\n");
@@ -232,7 +230,6 @@ int main (){
  ******************************************************************************/
 
 void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
-  p("chamada a função criar_matricula\n");
   // ponteiro de controle para ordenar a lista encadeada
   // as variaveis serao ordenadas no momento da criacao
   // significado: new_ptr e old_ptr;
@@ -254,6 +251,7 @@ void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
     do{
       p("digite o período:\n");
       s(" %f", &var);
+      getchar();
       n_ptr->periodo = (int)(var*10);    
     }while(verificar_periodo((int)(var*10)));
 
@@ -312,7 +310,7 @@ void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
       ptr_aux->aluno == n_ptr->aluno &&
       ptr_aux->disciplina == n_ptr->disciplina
     ){
-      p("matricula já existente\n");
+      p("Matricula já existente\n");
       return;
     }
     
@@ -335,7 +333,6 @@ void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
 }
 
 void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
-  p("chamada a função criar_aluno\n");
   Aluno *n_ptr, *o_ptr, *ptr_aux;
 
   n_ptr = (Aluno*)malloc(sizeof(Aluno));
@@ -407,7 +404,6 @@ void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
 }
 
 void criar_disciplina(Disciplina **ptr, char*nome, char* professor, int creditos, int codigo){
-  p("chamada a função criar_disciplina\n");
   Disciplina *n_ptr, *o_ptr, *ptr_aux;
 
   n_ptr = (Disciplina*)malloc(sizeof(Disciplina));
@@ -482,16 +478,13 @@ void criar_disciplina(Disciplina **ptr, char*nome, char* professor, int creditos
 
 
 void inserir_aluno_na_disciplina(){
-  p("chamada a função inserir_aluno_na_disciplina\n");
   criar_matricula(&ptr_i_matricula, 0, 0, 0);
 }
 void inserir_disciplina_no_aluno(){
-  p("chamada a função inserir_disciplina_no_aluno\n");
   criar_matricula(&ptr_i_matricula, 0, 0, 0);
 }
 
 void remover_matricula(Matricula **ptr){
-  p("chamada a função remover_matricula\n");
   Matricula *o_ptr, *ptr_aux;
   float var;
   int al_aux, dis_aux, per_aux;
@@ -586,45 +579,41 @@ void remover_aluno(Aluno **ptr, Matricula **ptr2){
       o_ptr->prox = ptr_aux->prox;
     }
     free(ptr_aux);
-    p("Aluno removido com sucesso\n");
-  }else{
-    p("Aluno não encontrado\n");
-  }
-  //Removendo o aluno todas as vezes que ele aparece na lista de matrícula
-  while(ptr_aux2){
-    while(ptr_aux2->aluno != al_aux){
-      o_ptr2 = ptr_aux2;
-      ptr_aux2 = ptr_aux2->prox;
-      p("entrei, mas ainda nao achei o aluno que eu quero\n");
-      if(!ptr_aux2){
-        break;
-      }
-    }
-    if(ptr_aux2){
-      while(ptr_aux2->aluno == al_aux){
-        p("achei o aluno que eu quero\n");
-        if(o_ptr2 == NULL){
-          *ptr2 = ptr_aux2->prox;
-          ptr_aux2 = ptr_aux2->prox;
-        }else{
-          ptr_aux2 = ptr_aux2->prox;
-        }
-        if(o_ptr2){
-          o_ptr2->prox = ptr_aux2;
-        }
+    
+    //Removendo o aluno todas as vezes que ele aparece na lista de matrícula
+    while(ptr_aux2){
+      while(ptr_aux2->aluno != al_aux){
+        o_ptr2 = ptr_aux2;
+        ptr_aux2 = ptr_aux2->prox;
         if(!ptr_aux2){
           break;
         }
       }
+      if(ptr_aux2){
+        while(ptr_aux2->aluno == al_aux){
+          if(o_ptr2 == NULL){
+            *ptr2 = ptr_aux2->prox;
+            ptr_aux2 = ptr_aux2->prox;
+          }else{
+            ptr_aux2 = ptr_aux2->prox;
+          }
+          if(o_ptr2){
+            o_ptr2->prox = ptr_aux2;
+          }
+          if(!ptr_aux2){
+            break;
+          }
+        }
+      }
     }
+    p("Aluno removido com sucesso\n");
+  }else{
+    p("Aluno não encontrado\n");
   }
-  p("Aluno removido da lista de matricula com sucesso\n");
-
   return;
 }
 
 void remover_disciplina(Disciplina **ptr, Matricula **ptr2){
-  p("chamada a função remover_disciplina\n");
   Disciplina *o_ptr, *ptr_aux;
   Matricula *o_ptr2, *ptr_aux2;
   int dis_aux;
@@ -637,6 +626,7 @@ void remover_disciplina(Disciplina **ptr, Matricula **ptr2){
 
   p("digite o código da disciplina que deseja cancelar a matricula\n");
   s(" %d", &dis_aux);
+  getchar();
 
   while(
     ptr_aux &&
@@ -655,43 +645,40 @@ void remover_disciplina(Disciplina **ptr, Matricula **ptr2){
       o_ptr->prox = ptr_aux->prox;
     }
     free(ptr_aux);
-    p("Disciplina removida com sucesso\n");
-  }else{
-    p("Disciplina não encontrada\n");
-  }
-  //Removendo a disciplina todas as vezes que ela aparece na lista de matrícula
-  while(ptr_aux2){
-    while(ptr_aux2->disciplina != dis_aux){
-      o_ptr2 = ptr_aux2;
-      ptr_aux2 = ptr_aux2->prox;
-      p("entrei, mas ainda nao achei a disciplina que eu quero\n");
-      if(!ptr_aux2){
-        break;
-      }
-    }
-    if(ptr_aux2){
-      while(ptr_aux2->disciplina == dis_aux){
-        p("achei a disciplina que eu quero\n");
-        if(o_ptr2 == NULL){
-          *ptr2 = ptr_aux2->prox;
-          ptr_aux2 = ptr_aux2->prox;
-        }else{
-          ptr_aux2 = ptr_aux2->prox;
-        }
-        if(o_ptr2){
-          o_ptr2->prox = ptr_aux2;
-        }
+    //Removendo a disciplina todas as vezes que ela aparece na lista de matrícula
+    while(ptr_aux2){
+      while(ptr_aux2->disciplina != dis_aux){
+        o_ptr2 = ptr_aux2;
+        ptr_aux2 = ptr_aux2->prox;
         if(!ptr_aux2){
           break;
         }
       }
+      if(ptr_aux2){
+        while(ptr_aux2->disciplina == dis_aux){
+          if(o_ptr2 == NULL){
+            *ptr2 = ptr_aux2->prox;
+            ptr_aux2 = ptr_aux2->prox;
+          }else{
+            ptr_aux2 = ptr_aux2->prox;
+          }
+          if(o_ptr2){
+            o_ptr2->prox = ptr_aux2;
+          }
+          if(!ptr_aux2){
+            break;
+          }
+        }
+      }
     }
+    p("Disciplina removida com sucesso\n");
+  }else{
+    p("Disciplina não encontrada\n");
   }
   return;
 }
 
 void consultar_disciplinas_por_aluno(Matricula **ptr){
-  p("chamada a função consultar_disciplinas_por_aluno\n");
   Matricula *ptr_aux;
   float var;
   int al_aux, per_aux;
@@ -715,7 +702,7 @@ void consultar_disciplinas_por_aluno(Matricula **ptr){
     p("Lista de disciplinas em que o aluno %d está matriculado no período %.1f\n", al_aux, var);
     int count = 0;
     while(ptr_aux && ptr_aux->periodo == per_aux && ptr_aux->aluno == al_aux){
-      p("%d-\t%d\n", count++, ptr_aux->disciplina);
+      p("%d-\t%d\n", ++count, ptr_aux->disciplina);
       ptr_aux = ptr_aux->prox;
     }
   }else{
@@ -725,7 +712,6 @@ void consultar_disciplinas_por_aluno(Matricula **ptr){
 }
 
 void consultar_alunos_por_disciplina(Matricula **ptr){
-  p("chamada a função consultar_alunos_por_disciplinas\n");
   Matricula *ptr_aux;
   float var;
   int dis_aux, per_aux;
@@ -749,7 +735,7 @@ void consultar_alunos_por_disciplina(Matricula **ptr){
         if(!count){
           p("Lista de alunos que estão matriculados na disicplina %d no período %.1f\n", dis_aux, var);
         }
-        p("%d-\t%d\n", count++, ptr_aux->aluno);
+        p("%d-\t%d\n", ++count, ptr_aux->aluno);
         ptr_aux = ptr_aux->prox;
       }else{
         ptr_aux = ptr_aux->prox;
@@ -763,7 +749,6 @@ void consultar_alunos_por_disciplina(Matricula **ptr){
 }
 
 void liberar(Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *ptr_matricula){
-  p("chamada a função liberar\n");
     if(ptr_aluno != NULL){
     while(ptr_aluno->prox != NULL){
       if(ptr_aluno->ant != NULL) free(ptr_aluno->ant);
@@ -803,7 +788,6 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
     return;
   }
 
-  p("chamada a função salvar\n");
   char tab = '\t', el = '\n'; 
   while(ptr_matricula){
     fputc('m',arq);
@@ -829,7 +813,6 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
     fputc(el, arq);
     p("\t\taluno salvo\n");
     ptr_aluno = ptr_aluno->prox;
-    p("\t\tboo\n");
   }
   while(ptr_disciplina){
     fputc('d',arq);
@@ -850,7 +833,6 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
 }
 
 void recuperar(FILE *arq){
-  p("chamada a função recuperar\n");
   arq = fopen("sistema_de_matricula.txt", "r");
   if (!arq) {
     printf("Erro ao abrir o arquivo.\n");
