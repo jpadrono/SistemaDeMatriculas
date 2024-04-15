@@ -58,7 +58,7 @@ void inserir_aluno_na_disciplina();
 void inserir_disciplina_no_aluno();
 void remover_matricula(Matricula **ptr);
 void remover_aluno(Aluno **ptr, Matricula **ptr2);
-void remover_disciplina(Disciplina **ptr);
+void remover_disciplina(Disciplina **ptr, Matricula **ptr2);
 void listar_alunos_por_periodo(); //dispensável
 void listar_disciplinas_por_periodo(); //dispensável
 void consultar_disciplinas_por_aluno(Matricula **ptr);
@@ -184,7 +184,7 @@ int main (){
               remover_aluno(&ptr_i_aluno, &ptr_i_matricula);
               break;
             case 3:
-              remover_disciplina(&ptr_i_disciplina);
+              remover_disciplina(&ptr_i_disciplina, &ptr_i_matricula);
               break;
             default:
               p("Opção inválida\n");
@@ -255,15 +255,23 @@ void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
     n_ptr->disciplina = disciplina;
   }else{
     float var;
-    p("digite o período:\n");
-    s(" %f", &var);
-    n_ptr->periodo = (int)(var*10);
+    do{
+      p("digite o período:\n");
+      s(" %f", &var);
+      n_ptr->periodo = (int)(var*10);    
+    }while(verificar_periodo((int)(var*10)));
 
-    p("digite o código do aluno:\n");
-    s(" %d", &(n_ptr->aluno));
+    do{
+      p("digite o código do aluno:\n");
+      s(" %d", &(n_ptr->aluno));
+      getchar();
+    }while(verificar_codigo_aluno(n_ptr->aluno));
 
-    p("digite o código do disciplina:\n");
-    s(" %d", &(n_ptr->disciplina));
+    do{
+      p("digite o código do disciplina:\n");
+      s(" %d", &(n_ptr->disciplina));
+      getchar();
+    }while(verificar_codigo_disciplina(n_ptr->disciplina));
   }
 
   //inserção na lista encadeada
@@ -356,8 +364,11 @@ void criar_aluno(Aluno **ptr, char* nome, char* cpf, int codigo){
     while(verificar_cpf(string_var));
     strcpy(n_ptr->cpf, string_var);
 
-    p("digite o código do aluno:\n");
-    s(" %d", &(n_ptr->codigo));
+    do{
+      p("digite o código do aluno:\n");
+      s(" %d", &(n_ptr->codigo));
+      getchar();
+    }while(verificar_codigo_aluno(n_ptr->codigo));
   }
 
 
@@ -426,9 +437,13 @@ void criar_disciplina(Disciplina **ptr, char*nome, char* professor, int creditos
 
     p("digite os créditos da disciplina:\n");
     s(" %d", &(n_ptr->creditos));
+    getchar();
 
-    p("digite o código da disciplina:\n");
-    s(" %d", &(n_ptr->codigo));
+    do{
+      p("digite o código da disciplina:\n");
+      s(" %d", &(n_ptr->codigo));
+      getchar();
+    }while(verificar_codigo_disciplina(n_ptr->codigo));
   }
 
   ptr_aux = *ptr;
@@ -550,8 +565,6 @@ void remover_aluno(Aluno **ptr, Matricula **ptr2){
 
   o_ptr = NULL;
   ptr_aux = *ptr;
-  o_ptr2 = NULL;
-  ptr_aux2 = *ptr2;
 
   o_ptr2 = NULL;
   ptr_aux2 = *ptr2;
@@ -582,47 +595,49 @@ void remover_aluno(Aluno **ptr, Matricula **ptr2){
     p("Aluno não encontrado\n");
   }
   //Removendo o aluno todas as vezes que ele aparece na lista de matrícula
-  while(1){
-  while(
-    ptr_aux2 && 
-    ptr_aux2->aluno != al_aux
-  ){
-    o_ptr2 = ptr_aux2;
-    ptr_aux2 = ptr_aux2->prox;
-    p("entrei, mas ainda nao achei o aluno que eu quero\n");
-  }
-  if(
-    ptr_aux2->aluno == al_aux
-  ){
-    p("achei o aluno que eu quero\n");
-    while(1){
-    if(o_ptr2 == NULL){
-      *ptr2 = ptr_aux2->prox;
-    }else{
+  while(ptr_aux2){
+    while(ptr_aux2->aluno != al_aux){
+      o_ptr2 = ptr_aux2;
       ptr_aux2 = ptr_aux2->prox;
-    }
-    if(ptr_aux2->aluno != al_aux){
-        o_ptr2->prox = ptr_aux2;
+      p("entrei, mas ainda nao achei o aluno que eu quero\n");
+      if(!ptr_aux2){
         break;
       }
-    }}
-    if(ptr_aux2->prox == NULL){
-      p("tchau lista");
-      break;
     }
+    if(ptr_aux2){
+      while(ptr_aux2->aluno == al_aux){
+        p("achei o aluno que eu quero\n");
+        if(o_ptr2 == NULL){
+          *ptr2 = ptr_aux2->prox;
+          ptr_aux2 = ptr_aux2->prox;
+        }else{
+          ptr_aux2 = ptr_aux2->prox;
+        }
+        if(o_ptr2){
+          o_ptr2->prox = ptr_aux2;
+        }
+        if(!ptr_aux2){
+          break;
+        }
+      }
     }
-    free(ptr_aux2);
-    p("Aluno removido da lista de matricula com sucesso\n");
+  }
+  p("Aluno removido da lista de matricula com sucesso\n");
+
   return;
 }
 
-void remover_disciplina(Disciplina **ptr){
+void remover_disciplina(Disciplina **ptr, Matricula **ptr2){
   p("chamada a função remover_disciplina\n");
   Disciplina *o_ptr, *ptr_aux;
+  Matricula *o_ptr2, *ptr_aux2;
   int dis_aux;
 
   o_ptr = NULL;
   ptr_aux = *ptr;
+
+  o_ptr2 = NULL;
+  ptr_aux2 = *ptr2;
 
   p("digite o código da disciplina que deseja cancelar a matricula\n");
   s(" %d", &dis_aux);
@@ -648,7 +663,34 @@ void remover_disciplina(Disciplina **ptr){
   }else{
     p("Disciplina não encontrada\n");
   }
-
+  //Removendo a disciplina todas as vezes que ela aparece na lista de matrícula
+  while(ptr_aux2){
+    while(ptr_aux2->disciplina != dis_aux){
+      o_ptr2 = ptr_aux2;
+      ptr_aux2 = ptr_aux2->prox;
+      p("entrei, mas ainda nao achei a disciplina que eu quero\n");
+      if(!ptr_aux2){
+        break;
+      }
+    }
+    if(ptr_aux2){
+      while(ptr_aux2->disciplina == dis_aux){
+        p("achei a disciplina que eu quero\n");
+        if(o_ptr2 == NULL){
+          *ptr2 = ptr_aux2->prox;
+          ptr_aux2 = ptr_aux2->prox;
+        }else{
+          ptr_aux2 = ptr_aux2->prox;
+        }
+        if(o_ptr2){
+          o_ptr2->prox = ptr_aux2;
+        }
+        if(!ptr_aux2){
+          break;
+        }
+      }
+    }
+  }
   return;
 }
 
@@ -813,9 +855,9 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
     fputc(tab, arq);
     fprintf(arq, "%s" , ptr_disciplina->nome);
     fputc(tab, arq);
-    fprintf(arq, "%s" , ptr_disciplina->professor);
-    fputc(tab, arq);
     fprintf(arq, "%d" , ptr_disciplina->creditos);
+    fputc(tab, arq);
+    fprintf(arq, "%s" , ptr_disciplina->professor);
     fputc(tab, arq);
     fprintf(arq, "%d" , ptr_disciplina->codigo);
     fputc(tab, arq);
@@ -842,15 +884,19 @@ void recuperar(FILE *arq){
       sscanf(linha, "%*s%d%d%d", &periodo, &aluno, &disciplina);
       criar_matricula(&ptr_i_matricula, periodo, aluno, disciplina);
     } else if (linha[0] == 'a') {
-      sscanf(linha, "%*s%s%s%d", nome, cpf, &codigo);
+      sscanf(linha, "%*s %[^0-9] %s%d", nome, cpf, &codigo);
+      nome[strlen(nome)-1] = '\0';
       criar_aluno(&ptr_i_aluno, nome, cpf, codigo);
     } else if (linha[0] == 'd') {
-      sscanf(linha, "%*s%s%s%d%d", nome, professor, &creditos, &codigo);
+      sscanf(linha, "%*s %[^0-9] %d %[^0-9] %d", nome, &creditos, professor, &codigo);
+      nome[strlen(nome)-1] = '\0';
+      professor[strlen(professor)-1] = '\0';
       criar_disciplina(&ptr_i_disciplina, nome, professor, creditos, codigo);
     }
   }
   return;
 }
+
 int verificar_cpf(char*ptr){
   int i, erro1=0, erro2=0, erro3=0;
 	int k=0;
@@ -902,5 +948,32 @@ int verificar_cpf(char*ptr){
 		printf("Quantidade de dígitos incorreta\n");
     return 1;
 	}
+  return 0;
+}
+
+int verificar_periodo(int periodo){
+  if(
+    (periodo%10) != 1 || 
+    (periodo%10) != 2 ||
+    periodo < 19700   ||
+    periodo > 20241
+  ){
+    p("período inválido");
+    return 1;
+  }
+  return 0;
+}
+
+int verificar_codigo_disciplina(int codigo){
+  if(codigo > 9999){
+    return 1;
+  }
+  return 0;
+}
+
+int verificar_codigo_aluno(int codigo){
+  if(codigo > 99999){
+    return 1;
+  }
   return 0;
 }
