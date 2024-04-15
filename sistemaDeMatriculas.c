@@ -953,12 +953,11 @@ int verificar_cpf(char*ptr){
 
 int verificar_periodo(int periodo){
   if(
-    (periodo%10) != 1 || 
-    (periodo%10) != 2 ||
+    ((periodo%10) != 1 && (periodo%10) != 2) ||
     periodo < 19700   ||
     periodo > 20241
   ){
-    p("período inválido");
+    p("período inválido\n");
     return 1;
   }
   return 0;
@@ -966,6 +965,7 @@ int verificar_periodo(int periodo){
 
 int verificar_codigo_disciplina(int codigo){
   if(codigo > 9999){
+    p("código inválido\n");
     return 1;
   }
   return 0;
@@ -973,6 +973,7 @@ int verificar_codigo_disciplina(int codigo){
 
 int verificar_codigo_aluno(int codigo){
   if(codigo > 99999){
+    p("código inválido\n");
     return 1;
   }
   return 0;
