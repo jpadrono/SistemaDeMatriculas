@@ -67,12 +67,8 @@ int verificar_cpf(char*ptr);
 int verificar_periodo(int periodo);
 int verificar_codigo_disciplina(int codigo);
 int verificar_codigo_aluno(int codigo);
-//  Perceba que o return da função procurar é um ponteiro com o endereço da 
-// struct, visto que vamos usar essa função pra modificar, apagar ou printar os 
-// dados da matricula, do aluno ou da discilina;
-Aluno *procurar_aluno(Aluno *ptr);
-Disciplina *procurar_disciplina(Disciplina *ptr);
-Matricula *procurar_matricula(Matricula *ptr);
+int buscar_aluno(int codigo, Aluno **ptr);
+int buscar_disciplina(int codigo, Disciplina **ptr);
 void liberar();
 void salvar(FILE *ptr, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula* ptr_matricula);
 void recuperar(FILE *arq);
@@ -265,13 +261,13 @@ void criar_matricula(Matricula **ptr, int periodo, int aluno, int disciplina){
       p("digite o código do aluno:\n");
       s(" %d", &(n_ptr->aluno));
       getchar();
-    }while(verificar_codigo_aluno(n_ptr->aluno));
+    }while(verificar_codigo_aluno(n_ptr->aluno) || !buscar_aluno(n_ptr->aluno, &ptr_i_aluno));
 
     do{
       p("digite o código do disciplina:\n");
       s(" %d", &(n_ptr->disciplina));
       getchar();
-    }while(verificar_codigo_disciplina(n_ptr->disciplina));
+    }while(verificar_codigo_disciplina(n_ptr->disciplina) || !buscar_disciplina(n_ptr->disciplina, &ptr_i_disciplina));
   }
 
   //inserção na lista encadeada
@@ -766,21 +762,6 @@ void consultar_alunos_por_disciplina(Matricula **ptr){
   return;
 }
 
-Aluno *procurar_aluno(Aluno *ptr){
-  p("chamada a função procurar_aluno\n");
-  return ptr;
-}
-
-Disciplina *procurar_disciplina(Disciplina *ptr){
-  p("chamada a função procurar_disciplina\n");
-  return ptr;
-}
-
-Matricula *procurar_matricula(Matricula *ptr){
-  p("chamada a função procurar_matricula\n");
-  return ptr;
-}
-
 void liberar(Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *ptr_matricula){
   p("chamada a função liberar\n");
     if(ptr_aluno != NULL){
@@ -977,4 +958,34 @@ int verificar_codigo_aluno(int codigo){
     return 1;
   }
   return 0;
+}
+
+int buscar_aluno(int codigo, Aluno **ptr){
+  Aluno *ptr_aux = *ptr;
+  while(ptr_aux){
+    if(ptr_aux->codigo == codigo){
+      return 1;
+    }else if(ptr_aux->codigo > codigo){
+      p("aluno não encontrado\n");
+      return 0;
+    }
+    ptr_aux = ptr_aux->prox;
+  }
+  return 0;
+  p("aluno não encontrado\n");
+}
+
+int buscar_disciplina(int codigo, Disciplina **ptr){
+  Disciplina *ptr_aux = *ptr;
+  while(ptr_aux){
+    if(ptr_aux->codigo == codigo){
+      return 1;
+    }else if(ptr_aux->codigo > codigo){
+      p("disciplina não encontrada\n");  
+      return 0;
+    }
+    ptr_aux = ptr_aux->prox;
+  }
+  return 0;
+  p("disciplina não encontrada\n");  
 }
