@@ -811,7 +811,6 @@ void salvar(FILE *arq, Aluno *ptr_aluno, Disciplina *ptr_disciplina, Matricula *
     fprintf(arq, "%d" , ptr_aluno->codigo);
     fputc(tab, arq);
     fputc(el, arq);
-    p("\t\taluno salvo\n");
     ptr_aluno = ptr_aluno->prox;
   }
   while(ptr_disciplina){

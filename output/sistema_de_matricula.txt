@@ -1,0 +1,10 @@
+m	20211	22029	2211	
+m	20221	22025	1111	
+m	20222	22035	2201	
+a	Joao Braga	111111111-11	22025	
+a	Mateus Mota	333333333-33	22029	
+a	Caruba	222222222-22	22035	
+d	Calculo	5	Ramon	1111	
+d	Matematica Discreta	1	Veloso	2201	
+d	Fisica Experimental	6	Romulo	2211	
+
